@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .tagline {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 2px;
+      margin-bottom: 36px;
+    }
+
+    /* Search bar */
+    .search-box {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 50px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      backdrop-filter: blur(10px);
+      transition: border 0.2s;
+    }
+
+    .search-box input::placeholder { color: rgba(255,255,255,0.4); }
+    .search-box input:focus { border-color: rgba(255,255,255,0.6); }
+
+    .search-box button {
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .search-box button:hover { opacity: 0.85; }
+    .search-box button:active { transform: scale(0.97); }
+
+    /* API key notice */
+    .api-notice {
+      background: rgba(255, 200, 0, 0.12);
+      border: 1px solid rgba(255, 200, 0, 0.35);
+      border-radius: 14px;
+      padding: 18px 24px;
+      max-width: 520px;
+      width: 100%;
+      margin-bottom: 30px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .api-notice a {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .api-notice input {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,200,0,0.4);
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      backdrop-filter: blur(20px);
+      padding: 32px;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 20px;
+    }
+
+    /* Current weather */
+    .city-name {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .country {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 24px;
+    }
+
+    .main-temp {
+      font-size: 5rem;
+      font-weight: 200;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .condition-emoji {
+      font-size: 2.4rem;
+      margin-bottom: 4px;
+    }
+
+    .condition-text {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 28px;
+      text-transform: capitalize;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 500;
+    }
+
+    /* Forecast */
+    .forecast-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 20px;
+    }
+
+    .forecast-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .forecast-row:last-child { border-bottom: none; }
+
+    .forecast-day {
+      width: 80px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .forecast-emoji { font-size: 1.3rem; width: 36px; text-align: center; }
+
+    .forecast-bar-wrap {
+      flex: 1;
+      margin: 0 16px;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .forecast-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #667eea, #f093fb);
+      transition: width 0.6s ease;
+    }
+
+    .forecast-temp {
+      font-size: 0.95rem;
+      font-weight: 600;
+      width: 54px;
+      text-align: right;
+    }
+
+    /* States */
+    .hidden { display: none !important; }
+
+    .error-msg {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-top: -20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 40px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 2px;
+    }
+
+    .loader span {
+      display: inline-block;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 16px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .footer a { color: rgba(255,255,255,0.35); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <h1>🌤 Weather</h1>
+  <p class="tagline">Live forecast for any city</p>
+
+  <!-- API Key Setup Notice -->
+  <div class="api-notice" id="api-notice">
+    <strong>⚡ One-time setup — takes 3 minutes:</strong><br><br>
+    1. Go to <a href="https://openweathermap.org/api" target="_blank">openweathermap.org/api</a> → Sign up free<br>
+    2. After signing in, go to your profile → <strong>API Keys</strong><br>
+    3. Copy the key and paste it below<br>
+    4. Key takes ~2 hours to activate after signup<br><br>
+    <input type="text" id="api-key-input" placeholder="Paste your API key here e.g. a1b2c3d4e5f6..." />
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <input type="text" id="city-input" placeholder="Enter city name e.g. Mumbai, Delhi, London..." />
+    <button onclick="fetchWeather()">Search</button>
+  </div>
+
+  <!-- Error -->
+  <p class="error-msg hidden" id="error-msg"></p>
+
+  <!-- Loading -->
+  <div class="loader hidden" id="loader"><span>Loading weather data...</span></div>
+
+  <!-- Current Weather Card -->
+  <div class="card hidden" id="current-card">
+    <div class="city-name" id="city-display"></div>
+    <div class="country" id="country-display"></div>
+    <div class="condition-emoji" id="emoji-display"></div>
+    <div class="main-temp" id="temp-display"></div>
+    <div class="condition-text" id="condition-display"></div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">Feels Like</div>
+        <div class="stat-value" id="feels-display">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Humidity</div>
+        <div class="stat-value" id="humidity-display">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Wind</div>
+        <div class="stat-value" id="wind-display">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">High / Low</div>
+        <div class="stat-value" id="highlow-display">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forecast Card -->
+  <div class="card hidden" id="forecast-card">
+    <div class="forecast-title">5-Day Forecast</div>
+    <div id="forecast-rows"></div>
+  </div>
+
+  <div class="footer">
+    Built with Python + OpenWeatherMap API &nbsp;|&nbsp;
+    <a href="https://github.com" target="_blank">View on GitHub</a>
+  </div>
+
+<script>
+  // -----------------------------------------------------------------------
+  // CONFIGURATION
+  // We read the API key from the input box the user fills in
+  // -----------------------------------------------------------------------
+
+  const API_BASE = "https://api.openweathermap.org/data/2.5";
+
+  // Save & load API key from localStorage so user doesn't retype every time
+  window.onload = () => {
+    const saved = localStorage.getItem("owm_api_key");
+    if (saved) {
+      document.getElementById("api-key-input").value = saved;
+    }
+
+    // Allow pressing Enter in the city input to search
+    document.getElementById("city-input").addEventListener("keydown", e => {
+      if (e.key === "Enter") fetchWeather();
+    });
+  };
+
+  // -----------------------------------------------------------------------
+  // HELPER: get weather emoji from condition code
+  // OpenWeatherMap returns a numeric code (e.g. 800 = clear sky)
+  // -----------------------------------------------------------------------
+  function getEmoji(id) {
+    if (id < 300) return "⛈️";
+    if (id < 400) return "🌦️";
+    if (id < 600) return "🌧️";
+    if (id < 700) return "❄️";
+    if (id < 800) return "🌫️";
+    if (id === 800) return "☀️";
+    if (id === 801) return "🌤️";
+    if (id < 900) return "☁️";
+    return "🌡️";
+  }
+
+  // -----------------------------------------------------------------------
+  // HELPER: show or hide elements
+  // -----------------------------------------------------------------------
+  function show(id) { document.getElementById(id).classList.remove("hidden"); }
+  function hide(id) { document.getElementById(id).classList.add("hidden"); }
+  function showError(msg) {
+    const el = document.getElementById("error-msg");
+    el.textContent = msg;
+    el.classList.remove("hidden");
+  }
+  function hideError() { hide("error-msg"); }
+
+  // -----------------------------------------------------------------------
+  // MAIN: fetchWeather
+  // Called when user clicks Search
+  // -----------------------------------------------------------------------
+  async function fetchWeather() {
+    // Get values from the input boxes
+    const apiKey = document.getElementById("api-key-input").value.trim();
+    const city   = document.getElementById("city-input").value.trim();
+
+    // Validate inputs
+    if (!apiKey) {
+      showError("Please enter your API key in the box above first.");
+      return;
+    }
+    if (!city) {
+      showError("Please enter a city name.");
+      return;
+    }
+
+    // Save key for next time
+    localStorage.setItem("owm_api_key", apiKey);
+
+    // Hide old results, show loader
+    hideError();
+    hide("current-card");
+    hide("forecast-card");
+    show("loader");
+
+    try {
+      // ---- FETCH CURRENT WEATHER ----
+      // We call the OpenWeatherMap API using fetch()
+      // This is exactly what requests.get() does in Python
+      const currentRes = await fetch(
+        `${API_BASE}/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`
+      );
+
+      // Handle errors
+      if (currentRes.status === 404) {
+        hide("loader");
+        showError(`City "${city}" not found. Check spelling and try again.`);
+        return;
+      }
+      if (currentRes.status === 401) {
+        hide("loader");
+        showError("Invalid API key. Check you pasted it correctly. New keys take ~2 hours to activate.");
+        return;
+      }
+      if (!currentRes.ok) {
+        hide("loader");
+        showError(`API error ${currentRes.status}. Please try again.`);
+        return;
+      }
+
+      // .json() converts the response to a JavaScript object (same as Python dict)
+      const current = await currentRes.json();
+
+      // ---- FETCH FORECAST ----
+      const forecastRes = await fetch(
+        `${API_BASE}/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`
+      );
+      const forecastData = await forecastRes.json();
+
+      hide("loader");
+
+      // ---- DISPLAY CURRENT WEATHER ----
+      displayCurrent(current);
+
+      // ---- DISPLAY FORECAST ----
+      if (forecastData && forecastData.list) {
+        displayForecast(forecastData.list);
+      }
+
+    } catch (err) {
+      hide("loader");
+      showError("Network error. Check your internet connection.");
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // DISPLAY: current weather card
+  // -----------------------------------------------------------------------
+  function displayCurrent(data) {
+    // Pull values out of the data object
+    const city      = data.name;
+    const country   = data.sys.country;
+    const temp      = Math.round(data.main.temp);
+    const feelsLike = Math.round(data.main.feels_like);
+    const humidity  = data.main.humidity;
+    const windMs    = data.wind.speed;
+    const windKmh   = Math.round(windMs * 3.6);
+    const high      = Math.round(data.main.temp_max);
+    const low       = Math.round(data.main.temp_min);
+    const condId    = data.weather[0].id;
+    const condText  = data.weather[0].description;
+
+    // Put values into the HTML elements
+    document.getElementById("city-display").textContent    = city;
+    document.getElementById("country-display").textContent = `${country}  ·  Live weather`;
+    document.getElementById("emoji-display").textContent   = getEmoji(condId);
+    document.getElementById("temp-display").textContent    = `${temp}°`;
+    document.getElementById("condition-display").textContent = condText;
+    document.getElementById("feels-display").textContent   = `${feelsLike}°C`;
+    document.getElementById("humidity-display").textContent = `${humidity}%`;
+    document.getElementById("wind-display").textContent    = `${windKmh} km/h`;
+    document.getElementById("highlow-display").textContent = `${high}° / ${low}°`;
+
+    show("current-card");
+  }
+
+  // -----------------------------------------------------------------------
+  // DISPLAY: 5-day forecast rows with gradient bars
+  // -----------------------------------------------------------------------
+  function displayForecast(list) {
+    // Pick one entry per day (the noon reading)
+    const daily = {};
+    for (const entry of list) {
+      const [date, time] = entry.dt_txt.split(" ");
+      if (time === "12:00:00") daily[date] = entry;
+    }
+
+    // Fallback: first entry per day
+    if (Object.keys(daily).length < 2) {
+      for (const entry of list) {
+        const date = entry.dt_txt.split(" ")[0];
+        if (!daily[date]) daily[date] = entry;
+      }
+    }
+
+    const entries = Object.entries(daily).slice(0, 5);
+
+    // Find min/max temps for bar scaling
+    const temps  = entries.map(([, e]) => e.main.temp);
+    const minT   = Math.min(...temps);
+    const maxT   = Math.max(...temps);
+    const range  = maxT - minT || 1;
+
+    // Day name formatter
+    const days   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+    const container = document.getElementById("forecast-rows");
+    container.innerHTML = "";
+
+    for (const [dateStr, entry] of entries) {
+      const temp     = Math.round(entry.main.temp);
+      const condId   = entry.weather[0].id;
+      const condText = entry.weather[0].description;
+      const barPct   = Math.round(((entry.main.temp - minT) / range) * 100);
+
+      // Format date: "2024-04-14" → "Mon 14"
+      const d        = new Date(dateStr + "T12:00:00");
+      const label    = `${days[d.getDay()]} ${d.getDate()}`;
+
+      // Build a row
+      const row = document.createElement("div");
+      row.className = "forecast-row";
+      row.innerHTML = `
+        <div class="forecast-day">${label}</div>
+        <div class="forecast-emoji">${getEmoji(condId)}</div>
+        <div class="forecast-bar-wrap">
+          <div class="forecast-bar" style="width: ${Math.max(barPct, 10)}%"></div>
+        </div>
+        <div class="forecast-temp">${temp}°C</div>
+      `;
+      container.appendChild(row);
+    }
+
+    show("forecast-card");
+  }
+</script>
+</body>
+</html>
