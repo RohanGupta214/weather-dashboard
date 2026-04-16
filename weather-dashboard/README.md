@@ -3,6 +3,7 @@
 A command-line weather dashboard built in Python that shows **live weather data and a 5-day forecast** for any city in the world — using the OpenWeatherMap API.
 
 > **Built by Rohann | Class 12 student | Aspiring CS student**
+> Visit the link to check it out!- https://rohangupta214.github.io/weather-dashboard
 
 ---
 
