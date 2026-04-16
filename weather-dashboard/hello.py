@@ -4,8 +4,8 @@
 name = "Your Name"                          # store your name in a variable
 goal = "NTU Singapore — Computer Science"  # store your goal
 
-print(f"Hi, I am {name}.")
+print(f"Hi, I am {Rohan Gupta}.")
 print(f"I am a Class 12 student from India.")
-print(f"My goal is to get into {goal}.")
+print(f"My goal is to get into {NTU}.")
 print(f"I am learning Python to build real projects.")
 print(f"This is day 1. Let's go.")
