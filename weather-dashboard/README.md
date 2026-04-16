@@ -2,7 +2,7 @@
 
 A command-line weather dashboard built in Python that shows **live weather data and a 5-day forecast** for any city in the world — using the OpenWeatherMap API.
 
-> **Built by [Your Name] | Class 12 student | Aspiring CS student**
+> **Built by Rohann | Class 12 student | Aspiring CS student**
 
 ---
 
@@ -144,12 +144,12 @@ weather-dashboard/
 
 ## Author
 
-**[Your Full Name]**  
-Class 12 student | Pathankot, Punjab, India  
+** Rohan gupta
+Class 12 student | Jammu,India  
 Aspiring Computer Science student  
 
-📧 [your email]  
-🔗 [your LinkedIn when you make one]
+📧 rohangupta.8490@gail.com 
+
 
 ---
 
